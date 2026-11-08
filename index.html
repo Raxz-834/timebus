@@ -16,6 +16,8 @@ body{background:radial-gradient(ellipse at 80% 0%,#12284a 0,transparent 45%),var
 .overtime-form textarea{resize:vertical}
 .overtime-badge{color:#f7cb85!important}
 .calendar-grid button.overtime small{color:#f7cb85}
+.overtime-duration{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.overtime-duration[hidden],#overtimeForm button[hidden]{display:none}
 #overtimeFeedback:empty{display:none}
 </style></head><body><div class="wrap"><header><div class="brand"><img class="logo" src="./logo.svg?v=2" alt="" width="44" height="44"><span class="brand-name">Ryzen<span>Time</span>Bus</span></div><div class="clock">WAKTU JEPANG · JST<b id="clock">--:--:--</b></div></header><main><div class="intro"><div><div class="eyebrow">Perjalanan harian, lebih mudah</div><h1 id="routeTitle">Chounoyamakouen<br><span>→</span> Imazu</h1><p>Jadwal busmu, dalam satu pandangan.</p></div><span class="pill">Shinki Bus &nbsp;·&nbsp; Rute 15</span></div><section class="work-section" aria-label="Kalender kerja Reza"><div class="sectiontitle"><div><div class="eyebrow">レザ · November 2026</div><h2>Kerja terencana. Bus siap.</h2></div><span>20 kerja · 9 libur · 1 cuti</span></div><div class="work-cards"><div id="workToday" class="work-card"></div><div id="workTomorrow" class="work-card tomorrow"></div></div><div class="work-body"><div class="work-calendar"><div class="sectiontitle"><h2>November 2026</h2><button class="text-button" id="workNow">Hari ini</button></div><div class="calendar-week"><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span></div><div class="calendar-grid" id="workCalendar"></div><div class="work-legend">A 07.00 · B 08.00 · ウ 10.00 · カ 12.00<br>公 Libur · 有 Cuti berbayar · titik biru: libur nasional · 残: ada lembur</div></div><div class="work-plan"><div id="workSelected"></div>
 <form id="overtimeForm" class="overtime-form">
@@ -27,9 +29,15 @@ body{background:radial-gradient(ellipse at 80% 0%,#12284a 0,transparent 45%),var
     <option value="yes">Ada lembur</option>
     <option value="no">Tidak ada lembur</option>
   </select>
+  <div id="overtimeDuration" class="overtime-duration" hidden>
+    <div><label for="overtimeHours">Jam</label><select id="overtimeHours"></select></div>
+    <div><label for="overtimeMinutes">Menit</label><select id="overtimeMinutes"></select></div>
+  </div>
   <label for="overtimeNote">Catatan (opsional)</label>
   <textarea id="overtimeNote" rows="2" maxlength="300" placeholder="Contoh: 1 jam, bantu pantau lantai"></textarea>
-  <button class="work-action" type="submit">Simpan catatan</button>
+  <button class="work-action" id="overtimeSave" type="submit">Simpan</button>
+  <button class="work-action" id="overtimeEdit" type="button" hidden>Edit</button>
+  <p id="overtimeTotal"></p>
   <p id="overtimeFeedback" role="status"></p>
   <p class="hint">Tersimpan di browser ini.</p>
 </form><details class="commute-settings"><summary>Atur perjalanan ke tempat kerja</summary><label for="commuteDirection">Arah berangkat kerja</label><select id="commuteDirection"><option value="outbound">Chounoyamakouen → Imazu</option><option value="return">Imazu → Chounoyamakouen</option></select><label for="commuteLead">Jeda keberangkatan sebelum masuk (menit)</label><input id="commuteLead" type="number" min="0" max="240" step="1" value="30"><p>Awal 30 menit, sebagai asumsi yang bisa diubah. Isi total waktu bus, berjalan kaki, dan cadangan. Jam tiba bus belum tersedia; pilihan ini bukan jaminan tiba tepat waktu.</p></details><p class="hint">Sumber: baris レザ pada foto jadwal yang kamu kirim. Data kerja hanya November 2026. Kalender mengikuti waktu Jepang.</p></div></div></section><div class="route-switch" role="group" aria-label="Pilih arah perjalanan"><button data-direction="outbound" class="active" aria-pressed="true">Ke Imazu <span>→</span></button><button data-direction="return" aria-pressed="false">Ke Chounoyamakouen <span>→</span></button></div><div id="holidayBanner" class="holiday-banner" aria-live="polite"></div><div class="layout"><section aria-label="Keberangkatan berikutnya"><div class="hero"><div class="eyebrow" id="heroLabel">Keberangkatan berikutnya</div><div class="hero-time" id="nextTime">--:--</div><div class="count" id="count">Memuat jadwal…</div><div class="hero-meta"><div>Dari<strong id="routeFrom">Chounoyamakouen</strong></div><div>Turun di<strong id="routeTo">Imazu</strong></div><div>Bus arah<strong id="routeDestination">Stasiun Akashi</strong></div></div></div><div class="sectiontitle"><h2>5 jam ke depan</h2><span id="dayLabel"></span></div><div class="upcoming" id="upcoming"></div><details class="note"><summary>Tentang jadwal ini</summary><p>Disalin dari foto jadwal yang kamu kirim untuk kedua arah. Jam adalah waktu keberangkatan dari halte asal pada arah yang dipilih, dalam zona waktu Jepang (JST). Jadwal ini belum diverifikasi ulang ke operator dan bukan posisi bus langsung. Kondisi lalu lintas bisa menyebabkan keterlambatan.</p><p>Sabtu dan Minggu/hari libur menggunakan jadwal yang sama. Tanggal 13–15 Agustus menggunakan jadwal Minggu/libur sesuai catatan pada foto. Hari libur nasional dan libur pengganti tahun 2026–2027 dikenali otomatis berdasarkan daftar resmi Kantor Kabinet Jepang. Di luar rentang tersebut, pilih jadwal libur secara manual. Pilihan tab manual tetap diutamakan. Kalender diperiksa 7 November 2026. <a href="https://www8.cao.go.jp/chosei/shukujitsu/gaiyou.html" target="_blank" rel="noopener">Sumber kalender resmi ↗</a></p><a href="https://navi.shinkibus.jp/" target="_blank" rel="noopener">Buka situs Shinki Bus ↗</a></details></section><section class="panel"><h2>Jadwal lengkap</h2><div class="tabs" role="group" aria-label="Jenis jadwal"><button data-mode="weekday">Hari kerja</button><button data-mode="saturday">Sabtu</button><button data-mode="holiday">Minggu/libur</button></div><div class="date-row"><label for="date">Pilih tanggal</label><input id="date" type="date"></div><p class="hint" id="dateHint"></p><div class="timetable" id="timetable"></div><div class="legend"><span class="dot"></span> Keberangkatan berikutnya pada tanggal pilihan</div></section></div></main><footer><span>Dibuat untuk Raizen &nbsp; / &nbsp; Waktu Jepang</span><button id="save">Cara akses cepat ↗</button></footer></div><div id="toast" role="status"></div><script>
@@ -65,9 +73,42 @@ try {
   if(saved && typeof saved==='object' && !Array.isArray(saved)) overtimeEntries=saved;
 } catch {}
 let overtimeSelectedDate='';
+function durationText(minutes){
+  return Math.floor(minutes/60)+' jam '+(minutes%60)+' menit';
+}
+for(const [id,max] of [['overtimeHours',24],['overtimeMinutes',59]]){
+  $(id).innerHTML=Array.from({length:max+1},(_,n)=>'<option value="'+n+'">'+n+'</option>').join('');
+}
+function setOvertimeEditing(editing){
+  for(const id of ['overtimeStatus','overtimeHours','overtimeMinutes','overtimeNote']){
+    $(id).disabled=!editing;
+  }
+  $('overtimeSave').hidden=!editing;
+  $('overtimeEdit').hidden=editing;
+}
+function updateOvertimeDuration(){
+  $('overtimeDuration').hidden=$('overtimeStatus').value!=='yes';
+}
+$('overtimeStatus').onchange=updateOvertimeDuration;
+$('overtimeEdit').onclick=()=>{
+  setOvertimeEditing(true);
+  $('overtimeFeedback').textContent='';
+  $('overtimeStatus').focus();
+};
+function renderOvertimeTotal(){
+  const month=selected.slice(0,7);
+  const entries=Object.entries(overtimeEntries).filter(([date,entry])=>date.startsWith(month+'-')&&entry?.status==='yes');
+  const total=entries.reduce((sum,[,entry])=>sum+(entry.durationMinutes||0),0);
+  const missing=entries.filter(([,entry])=>!entry.durationMinutes).length;
+  const name=new Intl.DateTimeFormat('id-ID',{month:'long',year:'numeric',timeZone:'Asia/Tokyo'}).format(new Date(month+'-01T12:00:00+09:00'));
+  $('overtimeTotal').textContent='Total lembur '+name+': '+durationText(total)+(missing?' · '+missing+' catatan belum punya durasi':'');
+}
 function overtimeLabel(date){
   const status=overtimeEntries[date]?.status;
-  if(status==='yes') return 'Ada lembur';
+  if(status==='yes'){
+    const duration=overtimeEntries[date].durationMinutes;
+    return duration?'Lembur '+durationText(duration):'Ada lembur';
+  }
   if(status==='no') return 'Tidak ada lembur';
   return '';
 }
@@ -78,14 +119,26 @@ function syncOvertimeForm(){
   $('overtimeDate').textContent=shortDate(selected);
   $('overtimeStatus').value=entry?.status||'';
   $('overtimeNote').value=entry?.note||'';
+  const minutes=entry?.durationMinutes||0;
+  $('overtimeHours').value=String(Math.floor(minutes/60));
+  $('overtimeMinutes').value=String(minutes%60);
+  updateOvertimeDuration();
+  setOvertimeEditing(!entry);
   $('overtimeFeedback').textContent='';
 }
 $('overtimeForm').onsubmit=event=>{
   event.preventDefault();
   const status=$('overtimeStatus').value;
   const note=$('overtimeNote').value.trim();
+  const durationMinutes=status==='yes'
+    ? Number($('overtimeHours').value)*60+Number($('overtimeMinutes').value)
+    : 0;
+  if(status==='yes' && durationMinutes===0){
+    $('overtimeFeedback').textContent='Pilih durasi lembur lebih dari 0 menit.';
+    return;
+  }
   const updated={...overtimeEntries};
-  if(status||note) updated[selected]={status,note};
+  if(status||note) updated[selected]={status,note,durationMinutes};
   else delete updated[selected];
   try {
     localStorage.setItem(overtimeKey,JSON.stringify(updated));
@@ -94,12 +147,13 @@ $('overtimeForm').onsubmit=event=>{
     return;
   }
   overtimeEntries=updated;
+  overtimeSelectedDate='';
   workRenderKey='';
   render();
   $('overtimeFeedback').textContent='Catatan tersimpan.';
 };
 function cardHtml(date,title){const w=workOn(date),plan=commutePlan(date);return `<div class="eyebrow">${title} · ${shortDate(date)}</div><h3>${w?w.time?w.time.replace(':','.'):'Istirahat':'Belum ada jadwal'}</h3><p>${w?w.name:'Jadwal bulan ini belum dimasukkan'}</p>${plan?`<p>${plan.latest?'Pilihan bus '+plan.latest+' JST':'Tidak ada bus sebelum batas waktu'}</p>`:''}${overtimeLabel(date)?`<p class="overtime-badge">${overtimeLabel(date)}</p>`:''}<button class="work-action" data-work-date="${date}">Lihat jadwal & bus →</button>`}
-function renderWork(){const today=japan().date,tomorrow=plusDay(today,1),key=[today,selected,commuteDirection,commuteLead].join('|');if(key===workRenderKey)return;workRenderKey=key;syncOvertimeForm();
+function renderWork(){const today=japan().date,tomorrow=plusDay(today,1),key=[today,selected,commuteDirection,commuteLead].join('|');if(key===workRenderKey)return;workRenderKey=key;syncOvertimeForm();renderOvertimeTotal();
 $('workToday').innerHTML=cardHtml(today,'Hari ini');$('workTomorrow').innerHTML=cardHtml(tomorrow,'Besok');
 const weekday=(new Date('2026-11-01T00:00:00Z').getUTCDay()+6)%7;
 $('workCalendar').innerHTML='<span></span>'.repeat(weekday)+workShifts.map((code,i)=>{const date='2026-11-'+String(i+1).padStart(2,'0'),w=shiftInfo[code];return `<button type="button" data-work-date="${date}" class="${code==='公'?'rest':code==='有'?'leave':''} ${date===today?'today':''} ${date===selected?'selected':''} ${holidays[date]?'national':''} ${overtimeEntries[date]?.status==='yes'?'overtime':''}" aria-label="${shortDate(date)}, ${w.name}${w.time?', masuk '+w.time:''}${holidays[date]?', '+holidayNames[holidays[date]]:''}${overtimeLabel(date)?', '+overtimeLabel(date):''}" aria-pressed="${date===selected}"><b>${i+1}</b><small>${code}${overtimeEntries[date]?.status==='yes'?' · 残':''}</small></button>`}).join('');
